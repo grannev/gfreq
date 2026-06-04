@@ -1,14 +1,23 @@
-TARGET = gerazip
-SOURCE = ./src/*
-CFLAGS = -g -Wall -ansi -pedantic -L:./lib/libcrypto.a
 
-LIBTRG = libcrypto.a
-LIBSRC = ./lib/*
-LFLAGS = -g -Wall -ansi -pedantic
+static: all
 
-build-src:
-	gcc $(CFLAGS) $(SOURCE) -o ./bin/$(TARGET)
+all: build-lib build-src
 
 build-lib:
-	gcc $(LFLAGS) $(LIBSRC) -o ./lib/$(LIBTRG)
+	cd lib && make
+
+build-dynlib-linux:
+	gcc -shared -fPIC -o ./gui/libgfreq.so ./lib/*.c
+
+build-dynlib-win32:
+	gcc -shared -o gui\gfreq.dll lib\*.c
+
+build-dynlib-macos:
+	clang -dynamiclib -o libgfreq.dylib ./lib/*.c
+
+build-src:
+	cd src && make
+
+clean:
+	rm -rf *.obj ./bin
 

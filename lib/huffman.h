@@ -1,47 +1,50 @@
 #ifndef HUFFMAN_H
 #define HUFFMAN_H
 
-#include "ubuffer.h"
+#include "const.h"
 
-#define DEPTH_PRINT_FACTOR_HT 12
-
+/* node_ht struct is likely holder for data in huffman tree */
 struct node_ht {
     struct node_ht *parent;
     struct node_ht *left;
     struct node_ht *right;
-    struct ubuffer *ubuf;
-    long weight;
+    unsigned char byte;
+    unsigned long weight;
 };
 
-void init_empty_node_ht(struct node_ht *holder);
+/* node_ht_init_empty is initialize empty structure */
+void node_ht_init_empty(struct node_ht *holder);
 
-void init_node_ht(
+/* node_ht_init is initilize structure with given args */
+void node_ht_init(
         struct node_ht *holder,
-        const unsigned char *ucstr,
-        unsigned long len,
-        long weight);
+        unsigned char byte,
+        unsigned long weight);
 
-void print_node_ht(const struct node_ht *tnode, int depth);
+/* node_ht_free is free allocated memory for childrens */
+void node_ht_free(struct node_ht *holder);
 
-void free_node_ht(struct node_ht *holder);
-
-
+/* huffman_tree is a struct for realisation of huffman codes algorithm */
 struct huffman_tree {
     struct node_ht *root;
-    int size;
+    unsigned long size;
 };
 
-void init_ht(struct huffman_tree *tree);
+/* ht_init is initialize tree with nulls */
+void ht_init(struct huffman_tree *tree);
 
-void insert_ht(
+/* ht_insert is inserting children and them parent into tree */
+void ht_insert(
         struct huffman_tree *tree,
         struct node_ht *lch,
         struct node_ht *rch,
         struct node_ht *parent);
 
-void print_ht(struct huffman_tree *tree);
+/* ht_print is used for debug information, prints all nodes of tree */
+void ht_print(const struct huffman_tree *tree);
 
-void free_ht(struct huffman_tree *tree);
+/* ht_free is free allocated memory for nodes of tree */
+void ht_free(struct huffman_tree *tree);
 
 #endif
 

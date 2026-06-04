@@ -2,28 +2,38 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "skew_heap.h"
 
-void init_empty_node_sh(struct node_sh *tnode)
+#include "skew_heap.h"
+#include "errs.h"
+
+void node_sh_init_empty(struct node_sh *tnode)
 {
+    if (tnode == NULL) {
+        printf(ERR_INIT_NULL);
+        exit(ERR_NODE_SH);
+    }
+
     tnode->holder = NULL;
     tnode->left = NULL;
     tnode->right = NULL;
 }
 
-void init_node_sh(
+void node_sh_init(
         struct node_sh *tnode,
-        const unsigned char *cstr,
-        unsigned long len, 
-        long weight
+        unsigned char byte,
+        unsigned long weight
 ) {
-    tnode->left = NULL;
-    tnode->right = NULL;
+    if (tnode == NULL) {
+        printf(ERR_INIT_NULL);
+        exit(ERR_NODE_SH);
+    }
+
+    node_sh_init_empty(tnode);
     tnode->holder = malloc(sizeof(struct node_ht));
-    init_node_ht(tnode->holder, cstr, len, weight);
+    node_ht_init(tnode->holder, byte, weight);
 }
 
-void skew_merge_node_sh(struct node_sh **lnode, struct node_sh **rnode)
+void node_sh_skew_merge(struct node_sh **lnode, struct node_sh **rnode)
 {
     if (*lnode == NULL) {
         *lnode = *rnode;
@@ -34,13 +44,13 @@ void skew_merge_node_sh(struct node_sh **lnode, struct node_sh **rnode)
     }
 
     if ((*lnode)->holder->weight >= (*rnode)->holder->weight)
-        swap_node_sh(lnode, rnode);
-    skew_merge_node_sh(&(*lnode)->right, rnode);
+        node_sh_swap(lnode, rnode);
+    node_sh_skew_merge(&(*lnode)->right, rnode);
 
-    swap_node_sh(&(*lnode)->left, &(*lnode)->right);
+    node_sh_swap(&(*lnode)->left, &(*lnode)->right);
 }
 
-void swap_node_sh(struct node_sh **lnode, struct node_sh **rnode)
+void node_sh_swap(struct node_sh **lnode, struct node_sh **rnode)
 {
     struct node_sh *tnode;
     tnode = *lnode;
@@ -48,57 +58,29 @@ void swap_node_sh(struct node_sh **lnode, struct node_sh **rnode)
     *rnode = tnode;
 }
 
-void print_node_sh(const struct node_sh *tnode, long depth)
+void node_sh_print(const struct node_sh *tnode, unsigned long depth)
 {
     int i;
 
     if (tnode == NULL)
         return;
 
-    print_node_sh(tnode->left, depth + DEPTH_PRINT_FACTOR_SH);
+    node_sh_print(tnode->left, depth + DEPTH_PRINT_FACTOR);
     
     for (i = 0; i < depth; i++)
         putchar(' ');
-    printf("('");
-    print_ubuf(tnode->holder->ubuf);
-    printf("', %ld)\n", tnode->holder->weight);
+    printf("('%c', %lu)\n", tnode->holder->byte, tnode->holder->weight);
 
-    print_node_sh(tnode->right, depth + DEPTH_PRINT_FACTOR_SH);
+    node_sh_print(tnode->right, depth + DEPTH_PRINT_FACTOR);
 }
 
-void clone_node_sh(struct node_sh *lnode, const struct node_sh *rnode)
-{
-    if (rnode == NULL) {
-        lnode = NULL;
-        return;
-    }
-
-    lnode->holder = malloc(sizeof(struct node_ht));
-    init_node_ht(
-        lnode->holder,
-        rnode->holder->ubuf->buffer,
-        rnode->holder->ubuf->len,
-        rnode->holder->weight
-    );
-
-    if (rnode->left != NULL) {
-        lnode->left = malloc(sizeof(struct node_sh));
-        clone_node_sh(lnode->left, rnode->left);
-    }
-
-    if (rnode->right != NULL) {
-        lnode->right = malloc(sizeof(struct node_sh));
-        clone_node_sh(lnode->right, rnode->right);
-    }
-}
-
-void free_node_sh(struct node_sh *tnode)
+void node_sh_free(struct node_sh *tnode)
 {
     if (tnode == NULL)
         return;
 
-    free_node_sh(tnode->left);
-    free_node_sh(tnode->right);
+    node_sh_free(tnode->left);
+    node_sh_free(tnode->right);
     free(tnode);
 }
 
@@ -106,65 +88,66 @@ void free_node_sh(struct node_sh *tnode)
 /* -------------------------------------------------------------------- */
 
 
-void init_sh(struct skew_heap *heap)
+void sh_init(struct skew_heap *heap)
 {
     if (heap == NULL) {
-        perror("Trying init NULL");
-        return;
+        printf(ERR_INIT_NULL);
+        exit(ERR_SKEW_HEAP);
     }
     heap->peak = NULL;
     heap->size = 0;
 }
 
-int is_empty_sh(struct skew_heap *heap)
+int sh_is_empty(const struct skew_heap *heap)
 {
-    if (heap == NULL)
-        return 0;
+    if (heap == NULL) {
+        printf(ERR_INFO_NULL);
+        exit(ERR_SKEW_HEAP);
+    }
     return heap->peak == NULL;
 }
 
-struct node_ht *min_sh(struct skew_heap *heap)
+struct node_ht *sh_min(struct skew_heap *heap)
 {
     if (heap == NULL || heap->peak == NULL) {
-        perror("Trying get min from NULL");
-        return NULL;
+        printf(ERR_INFO_NULL);
+        exit(ERR_SKEW_HEAP);
     }
     return heap->peak->holder;
 }
 
-long min_weight_sh(struct skew_heap *heap)
+long sh_min_weight(const struct skew_heap *heap)
 {
     if (heap == NULL || heap->peak == NULL) {
-        perror("Trying get min from NULL");
-        return 0;
+        printf(ERR_INFO_NULL);
+        exit(ERR_SKEW_HEAP);
     }
     return heap->peak->holder->weight;
 }
 
-unsigned char *min_cstr_sh(struct skew_heap *heap)
+unsigned char sh_min_byte(const struct skew_heap *heap)
 {
     if (heap == NULL || heap->peak == NULL) {
-        perror("Trying get min from NULL");
-        return NULL;
+        printf(ERR_INFO_NULL);
+        exit(ERR_SKEW_HEAP);
     }
-    return heap->peak->holder->ubuf->buffer;
+    return heap->peak->holder->byte;
 }
 
-void insert_sh(
+void sh_insert(
         struct skew_heap *heap,
-        const unsigned char *ucstr,
-        unsigned long len,
-        long weight
+        unsigned char byte,
+        unsigned long weight
 ) {
     struct node_sh *tnode;
 
     if (heap == NULL) {
-        perror("Trying insert to NULL");
-        return;
+        printf(ERR_INSERT_NULL);
+        exit(ERR_SKEW_HEAP);
     }
     
     tnode = malloc(sizeof(struct node_sh));
-    init_node_sh(tnode, ucstr, len, weight);
+    node_sh_init(tnode, byte, weight);
 
     if (heap->peak == NULL) {
         heap->peak = tnode;
@@ -172,45 +155,21 @@ void insert_sh(
         return;
     }
 
-    skew_merge_node_sh(&heap->peak, &tnode);
+    node_sh_skew_merge(&heap->peak, &tnode);
     heap->size++;
 }
 
-void insert_char_sh(struct skew_heap *heap, char ch, long weight)
-{
-    struct node_sh *tnode;
-    char cstr[1];
-
-    if (heap == NULL) {
-        perror("Trying insert to NULL");
-        return;
-    }
-    
-    cstr[0] = ch;
-    tnode = malloc(sizeof(struct node_sh));
-    init_node_sh(tnode, (const unsigned char *)cstr, 1, weight);
-
-    if (heap->peak == NULL) {
-        heap->peak = tnode;
-        heap->size++;
-        return;
-    }
-
-    skew_merge_node_sh(&heap->peak, &tnode);
-    heap->size++;
-}
-
-void insert_node_sh(struct skew_heap *heap, struct node_ht *hnode)
+void sh_insert_node(struct skew_heap *heap, struct node_ht *hnode)
 {
     struct node_sh *tnode;
 
     if (heap == NULL) {
-        perror("Trying insert to NULL");
-        return;
+        printf(ERR_INSERT_NULL);
+        exit(ERR_SKEW_HEAP);
     }
    
     tnode = malloc(sizeof(struct node_sh));
-    init_empty_node_sh(tnode);
+    node_sh_init_empty(tnode);
     tnode->holder = hnode;
 
     if (heap->peak == NULL) {
@@ -219,62 +178,64 @@ void insert_node_sh(struct skew_heap *heap, struct node_ht *hnode)
         return;
     }
 
-    skew_merge_node_sh(&heap->peak, &tnode);
+    node_sh_skew_merge(&heap->peak, &tnode);
     heap->size++;
 }
 
-struct node_ht *pop_sh(struct skew_heap *heap)
+void sh_pop(struct skew_heap *heap, struct node_ht **result)
 {
     struct node_sh *lpeak;
     struct node_sh *rpeak;
-    struct node_ht *thold;
     
     if (heap == NULL || heap->peak == NULL) {
-        perror("Nothing to pop from skew heap");
-        return NULL;
+        printf(ERR_POP_NULL);
+        exit(ERR_SKEW_HEAP);
     }
 
     lpeak = heap->peak->left;
     rpeak = heap->peak->right;
-    thold = heap->peak->holder;
 
+    *result = heap->peak->holder;
     free(heap->peak);
 
     heap->peak = lpeak;
-    skew_merge_node_sh(&heap->peak, &rpeak);
+    node_sh_skew_merge(&heap->peak, &rpeak);
 
     heap->size--;
-    return thold;
+    return;
 }
 
-void print_sh(struct skew_heap *heap)
+void sh_print(const struct skew_heap *heap)
 {
-    if (heap == NULL)
-        return;
-
-    print_node_sh(heap->peak, 0);
-}
-
-void merge_sh(struct skew_heap *lheap, struct skew_heap *rheap)
-{
-    if (lheap == NULL || rheap == NULL) {
-        perror("Trying merge from NULL or/and to NULL");
+    if (heap == NULL) {
+        printf(ERR_PRINT_NULL);
+        printf("Object code: %d", ERR_SKEW_HEAP);
         return;
     }
 
+    node_sh_print(heap->peak, 0);
+}
+
+void sh_merge(struct skew_heap *lheap, struct skew_heap *rheap)
+{
+    if (lheap == NULL || rheap == NULL) {
+        printf(ERR_MERGE_NULL);
+        exit(ERR_SKEW_HEAP);
+    }
+
     lheap->size = lheap->size + rheap->size;
-    skew_merge_node_sh(&lheap->peak, &rheap->peak);
+    node_sh_skew_merge(&lheap->peak, &rheap->peak);
 
     rheap->peak = NULL;
     rheap->size = 0;
 }
 
-void free_sh(struct skew_heap *heap)
+void sh_free(struct skew_heap *heap)
 {
     if (heap == NULL) {
-        perror("Trying free NULL");
-        return;
+        printf(ERR_FREE_NULL);
+        exit(ERR_SKEW_HEAP);
     }
 
-    free_node_sh(heap->peak);
+    node_sh_free(heap->peak);
 }

@@ -1,86 +1,89 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "huffman.h"
 
-void init_empty_node_ht(struct node_ht *holder)
+#include "huffman.h"
+#include "errs.h"
+
+void node_ht_init_empty(struct node_ht *holder)
 {
-    if (holder == NULL)
-        return;
+    if (holder == NULL) {
+        printf(ERR_INIT_NULL);
+        exit(ERR_NODE_HT);
+    }
 
     holder->parent = NULL;
     holder->right = NULL;
     holder->left = NULL;
-    holder->ubuf = NULL;
+    holder->byte = 0;
     holder->weight = 0;
 }
 
-void init_node_ht(
+void node_ht_init(
         struct node_ht *holder,
-        const unsigned char *ucstr,
-        unsigned long len,
-        long weight
+        unsigned char byte,
+        unsigned long weight
 ) {
-    if (holder == NULL)
-        return;
+    if (holder == NULL) {
+        printf(ERR_INIT_NULL);
+        exit(ERR_NODE_HT);
+    }
     
-    init_empty_node_ht(holder);
+    node_ht_init_empty(holder);
 
     holder->weight = weight;
-    holder->ubuf = malloc(sizeof(struct ubuffer));
-    init_ubuf(holder->ubuf, ucstr, len);
+    holder->byte = byte;
 }
 
-void print_node_ht(const struct node_ht *tnode, int depth)
+void node_ht_print(const struct node_ht *tnode, unsigned long depth)
 {
-    int i;
+    unsigned long i;
 
     if (tnode == NULL)
         return;
 
-    print_node_ht(tnode->left, depth + DEPTH_PRINT_FACTOR_HT);
+    node_ht_print(tnode->left, depth + DEPTH_PRINT_FACTOR);
     
     for (i = 0; i < depth; i++)
         putchar(' ');
-    printf("('");
-    print_ubuf(tnode->ubuf);
-    printf("', %ld)\n", tnode->weight);
+    printf("('%c', %lu)\n", tnode->byte, tnode->weight);
 
-    print_node_ht(tnode->right, depth + DEPTH_PRINT_FACTOR_HT);
+    node_ht_print(tnode->right, depth + DEPTH_PRINT_FACTOR);
 }
 
-void free_node_ht(struct node_ht *holder)
+void node_ht_free(struct node_ht *holder)
 {
     if (holder == NULL)
         return;
 
-    free_node_ht(holder->left);
-    free_node_ht(holder->right);
-
-    free_ubuf(holder->ubuf);
-    free(holder->ubuf);
+    node_ht_free(holder->left);
+    node_ht_free(holder->right);
 
     free(holder);
 }
 
 
 
-void init_ht(struct huffman_tree *tree)
+void ht_init(struct huffman_tree *tree)
 {
-    if (tree == NULL)
-        return;
+    if (tree == NULL) {
+        printf(ERR_INIT_NULL);
+        exit(ERR_HUFFMAN_TREE);
+    }
 
     tree->size = 0;
     tree->root = NULL;
 }
 
-void insert_ht(
+void ht_insert(
         struct huffman_tree *tree,
         struct node_ht *lch,
         struct node_ht *rch,
         struct node_ht *parent
 ) {
-    if (tree == NULL)
-        return;
+    if (tree == NULL) {
+        printf(ERR_INSERT_NULL);
+        exit(ERR_HUFFMAN_TREE);
+    }
     
     lch->parent = parent;
     rch->parent = parent;
@@ -91,19 +94,24 @@ void insert_ht(
     tree->size += 2;
 }
 
-void print_ht(struct huffman_tree *tree)
+void ht_print(const struct huffman_tree *tree)
 {
-    if (tree == NULL)
+    if (tree == NULL) {
+        printf(ERR_PRINT_NULL);
+        printf("Object code: %d", ERR_HUFFMAN_TREE);
         return;
+    }
 
-    print_node_ht(tree->root, 0);
+    node_ht_print(tree->root, 0);
 }
 
-void free_ht(struct huffman_tree *tree)
+void ht_free(struct huffman_tree *tree)
 {
-    if (tree == NULL)
-        return;
+    if (tree == NULL) {
+        printf(ERR_FREE_NULL);
+        exit(ERR_HUFFMAN_TREE);
+    }
 
-    free_node_ht(tree->root);
-    init_ht(tree);
+    node_ht_free(tree->root);
+    ht_init(tree);
 }

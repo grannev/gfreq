@@ -1,9 +1,9 @@
 #include "digmath.h"
 
-void swap_uchar(unsigned char *x, unsigned char *y)
+void add_bit(unsigned long *byte, char bit)
 {
-    unsigned char tmp = *x;
-    *x = *y;
-    *y = tmp;
+    *byte <<= 1;
+    if (bit)
+        *byte |= 1;
 }
 

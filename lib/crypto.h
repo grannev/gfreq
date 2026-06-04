@@ -1,18 +1,21 @@
-/* haffman algo to compress data header */
-#ifndef CRYPTO
-#define CRYPTO
+#ifndef CRYPTO_H
+#define CRYPTO_H
 
-#include "skew_heap.h"
+#include "byte_rw.h"
 
-#define ASCII_SIZE 256
+/* encrypt is ecnrypting data from in file to out file using byte_rw struct */
+void encrypt(struct byte_rw *brw);
 
-/* void init_frequency(long *frequency, const char *cstring); */
+/* dcerypt is decrypting data from in file to out file using byte_rw struct */
+void decrypt(struct byte_rw *brw);
 
-void encrypt(struct ubuffer *out_buffer, const struct ubuffer *in_buffer);
+/* compress is compressing file to file.ger, 
+ * rewrites file.ger if already exist */
+void compress(const char *in_file);
 
-void decrypt(struct ubuffer *out_buffer, const struct ubuffer *in_buffer);
-
-void archive(const char *out_file, const char *in_file);
+/* decompress is decompressing file.ger to file,
+ * rewrites file if already exist */
+void decompress(const char *in_file);
 
 #endif
 
