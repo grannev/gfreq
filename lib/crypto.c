@@ -4,9 +4,11 @@
 #include <stdio.h>
 
 #include "crypto.h"
+
 #include "converter.h"
 #include "skew_heap.h"
 #include "digmath.h"
+#include "byte_rw.h"
 #include "const.h"
 
 

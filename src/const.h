@@ -1,6 +1,6 @@
-#ifndef GFREQ_CONST_H
-#define GFREQ_CONST_H
+#ifndef GFREQ_CLI_CONST_H
+#define GFREQ_CLI_CONST_H
 
-#define USAGE_MSG "Usage: ./gfreq compress|decompress [file-path]\n"
+#define USAGE_MSG "Usage: ./gfreq compress|decompress [file-path]"
 
 #endif

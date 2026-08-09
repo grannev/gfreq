@@ -1,9 +1,13 @@
-#ifndef GFREQ_ERRS_H
-#define GFREQ_ERRS_H
+#ifndef GFREQ_CLI_ERRS_H
+#define GFREQ_CLI_ERRS_H
 
-#define ERR_NO_CMD "Error: command required\n"
-#define ERR_UNK_CMD "Error: unknown command\n"
-#define ERR_NO_FILE "Error: file path is required\n"
-#define ERR_NO_GER "Error: file extension must be .ger\n"
+enum cli_errors {
+	ERR_NO_CMD  = 1,
+	ERR_UNK_CMD = 2,
+	ERR_NO_FILE = 3,
+	ERR_NO_GER  = 4
+};
+
+void printerr(int error);
 
 #endif

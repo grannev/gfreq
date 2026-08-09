@@ -1,13 +1,13 @@
 #ifndef CRYPTO_H
 #define CRYPTO_H
 
-#include "byte_rw.h"
+/* #include "byte_rw.h" */
 
 /* encrypt is ecnrypting data from in file to out file using byte_rw struct */
-void encrypt(struct byte_rw *brw);
+/* void encrypt(struct byte_rw *brw); */
 
 /* dcerypt is decrypting data from in file to out file using byte_rw struct */
-void decrypt(struct byte_rw *brw);
+/* void decrypt(struct byte_rw *brw); */
 
 /* compress is compressing file to file.ger, 
  * rewrites file.ger if already exist */
