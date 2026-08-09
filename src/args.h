@@ -1,18 +1,25 @@
 #ifndef GFREQ_CLI_ARGS_H
 #define GFREQ_CLI_ARGS_H
 
-struct cli_arguments {
-	const char *command;
-	const char *file_name;
-	unsigned long file_name_len;
+#include "errs.h"
+
+enum cli_action {
+	action_help,
+	action_pack,
+	action_unpack
 };
 
-int handle_arguments(struct cli_arguments *args);
+struct cli_arguments {
+	enum cli_action action;
+	const char *in_file_name;
+	char *out_file_name;
+};
 
-int resolve_arguments(
+enum cli_errors resolve_arguments(
 		struct cli_arguments *args,
 		int argc,
 		char **argv);
 
-#endif
+void free_arguments(struct cli_arguments *args);
 
+#endif

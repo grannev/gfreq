@@ -9,7 +9,7 @@ enum gfreq_lib_errs {
 	gfreq_err_eof_file = 7,
 
 	gfreq_err_null_ptr = 15,
-	gfreq_err_no_memory = 16,
+	gfreq_err_no_memory = 16
 };
 
 /* Translate integer code of error to description string */
@@ -19,4 +19,3 @@ const char *gfreq_strerr(enum gfreq_lib_errs error);
 void gfreq_printerr(enum gfreq_lib_errs error, FILE *stream);
 
 #endif
-

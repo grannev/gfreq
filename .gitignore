@@ -1,3 +1,6 @@
 todo
-bin
-*gfreq*
+bin/
+lib/libgfreq.a
+gui/libgfreq.so
+gui/gfreq.dll
+gui/libgfreq.dylib

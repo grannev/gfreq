@@ -1,62 +1,106 @@
+#include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
-#include "../lib/crypto.h"
-#include "const.h"
 #include "args.h"
 #include "errs.h"
 
-int handle_arguments(struct cli_arguments *args)
+static int has_ger_extension(
+		const char *file_name,
+		unsigned long file_name_len)
 {
-	int cmp_stat/*, err_stat*/;
-
-	cmp_stat = strcmp(args->command, "compress") == 0;
-	if (cmp_stat) {
-		compress(args->file_name);
-		/* err_stat = compress_file(args->file_name); */
-		/* if (err_stat != 0) */
-		/* 	return err_stat; */
+	if (file_name_len <= 4)
 		return 0;
-	}
-	
-	cmp_stat = strcmp(args->command, "decompress") == 0;
-	if (cmp_stat) {
-		decompress(args->file_name);
-		/* err_stat = decompress_file(args->file_name); */
-		/* if (err_stat != 0) */
-		/* 	return err_stat; */
-		return 0;
-	}
 
-	cmp_stat = strcmp(args->command, "--help") == 0 ||
-			   strcmp(args->command, "help") == 0 ||
-			   strcmp(args->command, "-h") == 0;
-	if (cmp_stat) {
-		puts(USAGE_MSG);
-		return 0;
-	}
-
-	puts(USAGE_MSG);
-	return ERR_UNK_CMD;
+	return strcmp(file_name + file_name_len - 4, ".ger") == 0;
 }
 
-int resolve_arguments(
+static enum cli_errors make_packed_name(
+		const char *file_name,
+		unsigned long file_name_len,
+		char **out_file_name)
+{
+	*out_file_name = malloc(file_name_len + 5);
+	if (*out_file_name == NULL)
+		return err_no_memory;
+
+	strcpy(*out_file_name, file_name);
+	strcat(*out_file_name, ".ger");
+
+	return 0;
+}
+
+static enum cli_errors make_unpacked_name(
+		const char *file_name,
+		unsigned long file_name_len,
+		char **out_file_name)
+{
+	unsigned long out_file_name_len;
+
+	if (!has_ger_extension(file_name, file_name_len))
+		return err_no_ger;
+
+	out_file_name_len = file_name_len - 4;
+	*out_file_name = malloc(out_file_name_len + 1);
+	if (*out_file_name == NULL)
+		return err_no_memory;
+
+	strncpy(*out_file_name, file_name, out_file_name_len);
+	(*out_file_name)[out_file_name_len] = '\0';
+
+	return 0;
+}
+
+enum cli_errors resolve_arguments(
 		struct cli_arguments *args,
 		int argc,
 		char **argv)
 {
+	unsigned long file_name_len;
+
+	args->action = action_help;
+	args->in_file_name = NULL;
+	args->out_file_name = NULL;
+
 	if (argc < 2)
-		return ERR_NO_CMD;
-	args->command = argv[1];
-	
-	if (argc < 3) {
-		args->file_name = "";
-		args->file_name_len = 0;
-	} else {
-		args->file_name = argv[2];
-		args->file_name_len = strlen(argv[2]);
+		return err_no_cmd;
+
+	if (strcmp(argv[1], "--help") == 0 ||
+			strcmp(argv[1], "help") == 0 ||
+			strcmp(argv[1], "-h") == 0) {
+		args->action = action_help;
+		return 0;
 	}
-	
-	return 0;
+
+	if (argc < 3)
+		return err_no_file;
+
+	args->in_file_name = argv[2];
+	file_name_len = strlen(args->in_file_name);
+
+	if (strcmp(argv[1], "pack") == 0) {
+		args->action = action_pack;
+		return make_packed_name(
+				args->in_file_name,
+				file_name_len,
+				&args->out_file_name);
+	}
+
+	if (strcmp(argv[1], "unpack") == 0) {
+		args->action = action_unpack;
+		return make_unpacked_name(
+				args->in_file_name,
+				file_name_len,
+				&args->out_file_name);
+	}
+
+	return err_unk_cmd;
 }
 
+void free_arguments(struct cli_arguments *args)
+{
+	if (args == NULL)
+		return;
+
+	free(args->out_file_name);
+	args->out_file_name = NULL;
+}

@@ -1,27 +1,28 @@
-#include <stdio.h>
-
 #include "errs.h"
 
-/* #define ERR_NO_CMD "Error: command required\n" */
-/* #define ERR_UNK_CMD "Error: unknown command\n" */
-/* #define ERR_NO_FILE "Error: file path is required\n" */
-/* #define ERR_NO_GER "Error: file extension must be .ger\n" */
+static const char err_no_cmd_msg[] = "command required";
+static const char err_unk_cmd_msg[] = "unknown command";
+static const char err_no_file_msg[] = "file path is required";
+static const char err_no_ger_msg[] = "file extension must be .ger";
+static const char err_no_memory_msg[] = "memory allocation failed";
+static const char err_unknown_msg[] = "unknown client error";
 
-#define ERR_NO_CMD_MSG  "command required"
-#define ERR_UNK_CMD_MSG "unknown command"
-#define ERR_NO_FILE_MSG "file path is required"
-#define ERR_NO_GER_MSG  "file extension must be .ger"
-#define ERR_UNKNOWN_MSG "unknown error"
-
-void printerr(int error)
+void printerr(enum cli_errors error, FILE *stream)
 {
-	fputs("Error: ", stdout);
+	fprintf(stream, "Error: ");
 	switch (error) {
-		case ERR_NO_CMD:  puts(ERR_NO_CMD_MSG);  break;
-		case ERR_NO_GER:  puts(ERR_NO_GER_MSG);  break;
-		case ERR_UNK_CMD: puts(ERR_UNK_CMD_MSG); break;
-		case ERR_NO_FILE: puts(ERR_NO_FILE_MSG); break;
-		default: 		  puts(ERR_UNKNOWN_MSG); break;
+		case err_no_cmd:
+			fputs(err_no_cmd_msg, stream); break;
+		case err_no_ger:
+			fputs(err_no_ger_msg, stream); break;
+		case err_unk_cmd:
+			fputs(err_unk_cmd_msg, stream); break;
+		case err_no_file:
+			fputs(err_no_file_msg, stream); break;
+		case err_no_memory:
+			fputs(err_no_memory_msg, stream); break;
+		default:
+			fputs(err_unknown_msg, stream); break;
 	}
+	fputs("\n", stream);
 }
-

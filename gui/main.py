@@ -14,12 +14,12 @@ else:
     lib_name = "./libgfreq.so"
 
 
-class GfreqApp:
+class gfreq_app:
     def __init__(self):
         self.lib = None
         self.file_path = ""
-        self.WIDTH = 360
-        self.HEIGHT = 180
+        self.width = 360
+        self.height = 180
 
     def load_lib(self):
         self.lib = ctypes.CDLL(str(Path(lib_name).resolve()))
@@ -28,17 +28,20 @@ class GfreqApp:
             print("Place dynlib file next to main.py")
             exit(1)
 
-        self.lib.compress.argtypes = [ctypes.c_char_p]
-        self.lib.compress.restype = None
+        self.lib.gfreq_pack_file.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+        self.lib.gfreq_pack_file.restype = ctypes.c_int
 
-        self.lib.decompress.argtypes = [ctypes.c_char_p]
-        self.lib.decompress.restype = None
+        self.lib.gfreq_unpack_file.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+        self.lib.gfreq_unpack_file.restype = ctypes.c_int
+
+        self.lib.gfreq_strerr.argtypes = [ctypes.c_int]
+        self.lib.gfreq_strerr.restype = ctypes.c_char_p
 
     def init_root(self):
         self.root = tk.Tk()
         self.root.title("gfreq")
-        self.root.geometry(f"{self.WIDTH}x{self.HEIGHT}")
-        self.root.minsize(self.WIDTH, self.HEIGHT)
+        self.root.geometry(f"{self.width}x{self.height}")
+        self.root.minsize(self.width, self.height)
 
         self.label = tk.Label(self.root, text="File not specified", wraplength=320)
         self.label.pack(pady=15)
@@ -52,8 +55,8 @@ class GfreqApp:
 
     def fit_window_to_content(self):
         self.root.update_idletasks()
-        width = max(self.WIDTH, self.root.winfo_reqwidth())
-        height = max(self.HEIGHT, self.root.winfo_reqheight())
+        width = max(self.width, self.root.winfo_reqwidth())
+        height = max(self.height, self.root.winfo_reqheight())
         self.root.geometry(f"{width}x{height}")
 
 
@@ -67,6 +70,9 @@ class GfreqApp:
 
 
     def process_file(self):
+        errstat = 0
+        out_file_path = ""
+
         if self.lib is None:
             return
 
@@ -75,16 +81,30 @@ class GfreqApp:
             return
 
         if self.file_path.endswith(".ger"):
-            self.lib.decompress(os.fsencode(self.file_path))
-            messagebox.showinfo("Done", f"File decompressed:\n{self.file_path[:-4]}")
+            out_file_path = self.file_path[:-4]
+            errstat = self.lib.gfreq_unpack_file(
+                os.fsencode(self.file_path),
+                os.fsencode(out_file_path)
+            )
+            if errstat != 0:
+                messagebox.showerror("Error", self.lib.gfreq_strerr(errstat).decode())
+                return
+            messagebox.showinfo("Done", f"File decompressed:\n{out_file_path}")
             return
 
-        self.lib.compress(os.fsencode(self.file_path))
-        messagebox.showinfo("Done", f"File compressed:\n{self.file_path}.ger")
+        out_file_path = f"{self.file_path}.ger"
+        errstat = self.lib.gfreq_pack_file(
+            os.fsencode(self.file_path),
+            os.fsencode(out_file_path)
+        )
+        if errstat != 0:
+            messagebox.showerror("Error", self.lib.gfreq_strerr(errstat).decode())
+            return
+        messagebox.showinfo("Done", f"File compressed:\n{out_file_path}")
 
 
 def main():
-    app = GfreqApp()
+    app = gfreq_app()
     app.load_lib()
     app.init_root()
     app.mainloop()
@@ -92,4 +112,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

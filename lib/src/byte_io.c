@@ -1,15 +1,12 @@
-#include <stdlib.h>
-
 #include "byte_io.h"
-#include "fileops.h"
-#include "../include/errs.h"
+#include "debug.h"
 
 enum gfreq_lib_errs
 bio_open(struct byte_io *bio,
 		const char *in_file_name,
 		const char *out_file_name)
 {
-	if (bio == NULL) {
+	if (bio == NULL || in_file_name == NULL || out_file_name == NULL) {
 		GFREQ_DEBUG_MSG;
 		return gfreq_err_null_ptr;
 	}
@@ -26,14 +23,14 @@ bio_open(struct byte_io *bio,
 }
 
 enum gfreq_lib_errs
-bio_read_long(struct byte_io *bio, unsigned long *value)
+bio_read_ulong(struct byte_io *bio, unsigned long *value)
 {
-	if (bio == NULL) {
+	if (bio == NULL || bio->in == NULL || value == NULL) {
 		GFREQ_DEBUG_MSG;
 		return gfreq_err_null_ptr;
 	}
 
-    if (fscanf(bio->in, "%lu", value) == EOF) {
+	if (fscanf(bio->in, "%lu", value) != 1) {
 		GFREQ_DEBUG_MSG;
 		return gfreq_err_eof_file;
 	}
@@ -42,30 +39,34 @@ bio_read_long(struct byte_io *bio, unsigned long *value)
 }
 
 enum gfreq_lib_errs
-bio_read(struct byte_io *bio, unsigned char *value)
+bio_read_uch(struct byte_io *bio, unsigned char *value)
 {
-	if (bio == NULL) {
+	int current_byte;
+
+	if (bio == NULL || bio->in == NULL || value == NULL) {
 		GFREQ_DEBUG_MSG;
 		return gfreq_err_null_ptr;
 	}
-	
-	if (fscanf(bio->in, "%u", value) == EOF) {
+
+	current_byte = fgetc(bio->in);
+	if (current_byte == EOF) {
 		GFREQ_DEBUG_MSG;
 		return gfreq_err_eof_file;
 	}
 
+	*value = (unsigned char) current_byte;
 	return 0;
 }
 
 enum gfreq_lib_errs
 bio_write_ulong(struct byte_io *bio, unsigned long value)
 {
-	if (bio == NULL) {
+	if (bio == NULL || bio->out == NULL) {
 		GFREQ_DEBUG_MSG;
 		return gfreq_err_null_ptr;
 	}
 
-	if (fprintf(bio->out, "%lu", value) == EOF) {
+	if (fprintf(bio->out, "%lu", value) < 0) {
 		GFREQ_DEBUG_MSG;
 		return gfreq_err_eof_file;
 	}
@@ -76,12 +77,12 @@ bio_write_ulong(struct byte_io *bio, unsigned long value)
 enum gfreq_lib_errs
 bio_write_uch(struct byte_io *bio, unsigned char value)
 {
-	if (bio == NULL) {
+	if (bio == NULL || bio->out == NULL) {
 		GFREQ_DEBUG_MSG;
 		return gfreq_err_null_ptr;
 	}
 
-	if (fprintf(bio->out, "%u", value) == EOF) {
+	if (fputc(value, bio->out) == EOF) {
 		GFREQ_DEBUG_MSG;
 		return gfreq_err_eof_file;
 	}
@@ -97,16 +98,10 @@ bio_close(struct byte_io *bio)
 		return gfreq_err_null_ptr;
 	}
 
-	if (fclose(bio->in) == EOF) {
-		GFREQ_DEBUG_MSG;
-		return gfreq_err_eof_file;
-	}
-
-	if (fclose(bio->out) == EOF) {
+	if (fclose(bio->in) == EOF || fclose(bio->out) == EOF) {
 		GFREQ_DEBUG_MSG;
 		return gfreq_err_eof_file;
 	}
 
 	return 0;
 }
-

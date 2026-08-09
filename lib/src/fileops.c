@@ -2,38 +2,41 @@
 
 #include "fileops.h"
 #include "const.h"
+#include "debug.h"
 
 unsigned long get_file_size(const char *name)
 {
-    long size;
-    FILE *file;
+	long size;
+	FILE *file;
 
 	if (name == NULL) {
 		GFREQ_DEBUG_MSG;
-		return -1;
+		return (unsigned long) -1;
 	}
 
-    file = fopen(name, "rb");
-    if (file == NULL) {
+	file = fopen(name, "rb");
+	if (file == NULL) {
 		GFREQ_DEBUG_MSG;
-		return -1;
+		return (unsigned long) -1;
 	}
 
-    if (fseek(file, 0, SEEK_END) != 0) {
+	if (fseek(file, 0, SEEK_END) != 0) {
 		GFREQ_DEBUG_MSG;
-		return -1;
+		fclose(file);
+		return (unsigned long) -1;
 	}
 
-    size = ftell(file);
+	size = ftell(file);
 	if (size == -1) {
 		GFREQ_DEBUG_MSG;
-		return -1;
+		fclose(file);
+		return (unsigned long) -1;
 	}
 
 	if (fclose(file) == EOF)
-		return -1;
+		return (unsigned long) -1;
 
-    return size;
+	return (unsigned long) size;
 }
 
 short check_file_magic_number(const char *name)
@@ -52,13 +55,15 @@ short check_file_magic_number(const char *name)
 		return -1;
 	}
 
-	if (fscanf("%lu", &magic) == EOF) {
+	if (fscanf(file, "%lu", &magic) != 1) {
 		GFREQ_DEBUG_MSG;
+		fclose(file);
 		return -1;
 	}
 
 	if (magic != gfreq_magic_number) {
 		GFREQ_DEBUG_MSG;
+		fclose(file);
 		return -1;
 	}
 
@@ -69,4 +74,3 @@ short check_file_magic_number(const char *name)
 
 	return 0;
 }
-

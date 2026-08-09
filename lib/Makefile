@@ -1,30 +1,28 @@
 CC = gcc
 AR = ar
 
-CFLAGS = -g -Wall -ansi -pedantic
+CFLAGS = -g -Wall -Wextra -ansi -pedantic -I include -I src
 ARFLAGS = -crs
 
-SOURCES = *.c
-OBJECTS = *.o
+SOURCES = $(wildcard src/*.c)
+OBJECTS = $(SOURCES:.c=.o)
 
 TARGET = libgfreq.a
 
-static: all
+all: static
 
-all: clean build-obj pack-lib
-	make clean-obj
+static: $(TARGET)
 
-pack-lib:
-	$(AR) $(ARFLAGS) $(TARGET) $(OBJECTS)
+$(TARGET): $(OBJECTS)
+	$(AR) $(ARFLAGS) $@ $(OBJECTS)
 
-build-obj:
-	$(CC) $(CFLAGS) -c $(SOURCES)
+src/%.o: src/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
-clean: clean-obj clean-target
+clean: clean_obj clean_target
 
-clean-obj:
-	rm -f $(OBJECTS)
+clean_obj:
+	rm -f src/*.o *.o
 
-clean-target:
+clean_target:
 	rm -f $(TARGET)
-

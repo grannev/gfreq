@@ -5,10 +5,10 @@
 #include "debug.h"
 
 enum gfreq_lib_errs node_sh_init(
-        struct node_sh *tnode,
-        unsigned char byte,
-        unsigned long weight
-) {
+		struct node_sh *tnode,
+		unsigned char byte,
+		unsigned long weight)
+{
 	int errstat;
 
 	if (tnode == NULL) {
@@ -75,12 +75,13 @@ enum gfreq_lib_errs node_sh_swap(
 		struct node_sh **lnode,
 		struct node_sh **rnode)
 {
+	struct node_sh *tnode;
+
 	if (lnode == NULL || rnode == NULL) {
 		GFREQ_DEBUG_MSG;
 		return gfreq_err_null_ptr;
 	}
 
-    struct node_sh *tnode;
     tnode = *lnode;
     *lnode = *rnode;
     *rnode = tnode;
@@ -126,16 +127,14 @@ int sh_is_empty(const struct skew_heap *heap)
     return heap->peak == NULL;
 }
 
-enum gfreq_lib_errs sh_min(struct skew_heap *heap, struct node_ht *out)
+enum gfreq_lib_errs sh_min(struct skew_heap *heap, struct node_ht **out)
 {
-    if (heap == NULL || heap->peak == NULL) {
-		out = NULL;
-
+    if (heap == NULL || heap->peak == NULL || out == NULL) {
 		GFREQ_DEBUG_MSG;
 		return gfreq_err_null_ptr;
     }
 
-	out = heap->peak->holder;
+	*out = heap->peak->holder;
     return 0;
 }
 
@@ -179,7 +178,8 @@ enum gfreq_lib_errs sh_insert(
 	return 0;
 }
 
-enum gfreq_lib_errs sh_insert_node(struct skew_heap *heap, struct node_ht *hnode)
+enum gfreq_lib_errs
+sh_insert_node(struct skew_heap *heap, struct node_ht *hnode)
 {
     struct node_sh *tnode;
 	int errstat;
@@ -265,8 +265,6 @@ enum gfreq_lib_errs sh_merge(struct skew_heap *lheap, struct skew_heap *rheap)
 
 enum gfreq_lib_errs sh_free(struct skew_heap *heap)
 {
-	int errstat;
-
     if (heap == NULL) {
 		GFREQ_DEBUG_MSG;
 		return gfreq_err_null_ptr;
