@@ -8,13 +8,15 @@
 struct byte_io {
     FILE *in;
     FILE *out;
-    unsigned long in_len;
 };
 
 enum gfreq_lib_errs
 bio_open(struct byte_io *bio,
 		const char *in_file_name,
 		const char *out_file_name);
+
+enum gfreq_lib_errs
+bio_skip_magic(struct byte_io *bio);
 
 enum gfreq_lib_errs
 bio_read_ulong(struct byte_io *bio, unsigned long *value);

@@ -96,8 +96,8 @@ void node_sh_free(struct node_sh *tnode)
 
     node_sh_free(tnode->left);
     node_sh_free(tnode->right);
-	if (tnode != NULL)
-    	free(tnode);
+	node_ht_free(tnode->holder);
+	free(tnode);
 }
 
 
@@ -271,6 +271,8 @@ enum gfreq_lib_errs sh_free(struct skew_heap *heap)
     }
 
     node_sh_free(heap->peak);
+	heap->peak = NULL;
+	heap->size = 0;
 
 	return 0;
 }

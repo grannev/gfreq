@@ -9,7 +9,9 @@ enum gfreq_lib_errs {
 	gfreq_err_eof_file = 7,
 
 	gfreq_err_null_ptr = 15,
-	gfreq_err_no_memory = 16
+	gfreq_err_no_memory = 16,
+
+	gfreq_err_no_magic = 25
 };
 
 /* Translate integer code of error to description string */

@@ -5,7 +5,7 @@
 enum gfreq_lib_errs
 gfreq_pack_file(const char *in_file_name, const char *out_file_name)
 {
-	struct crypto_module crypto;
+	struct crypto_module cm;
 	enum gfreq_lib_errs errstat;
 
 	if (in_file_name == NULL || out_file_name == NULL) {
@@ -13,15 +13,15 @@ gfreq_pack_file(const char *in_file_name, const char *out_file_name)
 		return gfreq_err_null_ptr;
 	}
 
-	errstat = cm_init(&crypto);
+	errstat = cm_init(&cm, in_file_name, out_file_name);
 	if (errstat != 0)
 		return errstat;
 
-	errstat = encrypt(&crypto);
+	errstat = encrypt(&cm);
 	if (errstat != 0)
 		return errstat;
 
-	errstat = cm_finalize(&crypto);
+	errstat = cm_finalize(&cm);
 	if (errstat != 0)
 		return errstat;
 
@@ -39,7 +39,7 @@ gfreq_unpack_file(const char *in_file_name, const char *out_file_name)
 		return gfreq_err_null_ptr;
 	}
 
-	errstat = cm_init(&crypto);
+	errstat = cm_init(&crypto, in_file_name, out_file_name);
 	if (errstat != 0)
 		return errstat;
 
@@ -53,4 +53,3 @@ gfreq_unpack_file(const char *in_file_name, const char *out_file_name)
 
 	return 0;
 }
-

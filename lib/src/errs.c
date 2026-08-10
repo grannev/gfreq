@@ -6,6 +6,7 @@ static const char err_no_file_msg[] = "file not found";
 static const char err_open_file_msg[] = "could not open file";
 static const char err_eof_file_msg[] = "unexpected end of file";
 static const char err_no_memory_msg[] = "memory allocation failed";
+static const char err_no_magic_msg[] = "magic number not found";
 
 static const char err_unknown_msg[] = "unknown error";
 
@@ -22,6 +23,8 @@ const char *gfreq_strerr(enum gfreq_lib_errs error)
 			return err_null_ptr_msg;
 		case gfreq_err_no_memory:
 			return err_no_memory_msg;
+		case gfreq_err_no_magic:
+			return err_no_magic_msg;
 	}
 
 	return err_unknown_msg;

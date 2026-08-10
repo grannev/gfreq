@@ -8,9 +8,9 @@ SOURCE  = *.c
 
 static: all
 
-all: clean dir_bin build_src
+all: clean dir_bin build_cli
 
-build_src:
+build_cli:
 	gcc $(CFLAGS) $(SOURCE) $(LDFLAGS) -o $(TARGET)
 
 dir_bin:

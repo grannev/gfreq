@@ -12,9 +12,13 @@ bio_open(struct byte_io *bio,
 	}
 
 	bio->in = fopen(in_file_name, "rb");
-	bio->out = fopen(out_file_name, "wb");
+	if (bio->in == NULL) {
+		GFREQ_DEBUG_MSG;
+		return gfreq_err_open_file;
+	}
 
-	if (bio->in == NULL || bio->out == NULL) {
+	bio->out = fopen(out_file_name, "wb");
+	if (bio->out == NULL) {
 		GFREQ_DEBUG_MSG;
 		return gfreq_err_open_file;
 	}
@@ -34,6 +38,24 @@ bio_read_ulong(struct byte_io *bio, unsigned long *value)
 		GFREQ_DEBUG_MSG;
 		return gfreq_err_eof_file;
 	}
+
+	return 0;
+}
+
+enum gfreq_lib_errs
+bio_skip_magic(struct byte_io *bio)
+{
+	enum gfreq_lib_errs errstat;
+	unsigned char temp;
+
+	if (bio == NULL || bio->in == NULL) {
+		GFREQ_DEBUG_MSG;
+		return gfreq_err_null_ptr;
+	}
+
+	errstat = bio_read_uch(bio, &temp);
+	if (errstat != 0)
+		return errstat;
 
 	return 0;
 }

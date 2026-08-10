@@ -1,7 +1,7 @@
 
 static: all
 
-all: build_lib build_src
+all: build_lib build_cli
 
 build_lib:
 	cd lib && make
@@ -15,10 +15,10 @@ build_dynlib_win32:
 build_dynlib_macos:
 	clang -dynamiclib -I ./lib/include -o ./gui/libgfreq.dylib ./lib/src/*.c
 
-build_src:
-	cd src && make
+build_cli:
+	cd cli && make
 
 clean:
 	cd lib && make clean
-	cd src && make clean
+	cd cli && make clean
 	rm -rf *.obj ./bin
